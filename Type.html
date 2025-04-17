@@ -23,17 +23,17 @@ async function analyze() {
   const text = document.getElementById('editor').value;
   
   // 调用DeepSeek V3 Model（成本更低）
-  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+  const response = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
-      model: "gpt-3.5-turbo",
+      model: "deepseek-chat",
       messages: [{
-        role: "user",
-        content: `修正以下英文日记的语法错误，保持原意，直接返回修正后的文本：\n\n${text}`
+        "role": "user",
+        "content": `修正以下英文日记的语法错误，保持原意，直接返回修正后的文本：\n\n${text}`
       }]
     })
   });
