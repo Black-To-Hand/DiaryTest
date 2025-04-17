@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Diary Helper</title>
+  <link rel="stylesheet" href="https://unpkg.com/simplemde@1.11.2/dist/simplemde.min.css">
+  <script src="https://unpkg.com/simplemde@1.11.2/dist/simplemde.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/diff@5.0.0/dist/diff.min.js"></script>
+</head>
+<body>
+  <!-- 输入区 -->
+  <textarea id="editor"></textarea>
+  
+  <!-- 控制区 -->
+  <button onclick="analyze()">AI修改</button>
+  
+  <!-- 结果区 -->
+  <div id="result"></div>
+
+<script>
+const API_KEY = 'sk-9f25b3a442a041e8998f8c3727ef41a3'; // 临时存储在前端（仅限个人使用）
+
+async function analyze() {
+  const text = document.getElementById('editor').value;
+  
+  // 调用DeepSeek V3 Model（成本更低）
+  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [{
+        role: "user",
+        content: `修正以下英文日记的语法错误，保持原意，直接返回修正后的文本：\n\n${text}`
+      }]
+    })
+  });
+
+  const result = await response.json();
+  const correctedText = result.choices[0].message.content;
+  
+  // 显示差异对比
+  const diff = Diff.diffWords(text, correctedText);
+  const display = diff.map(part => 
+    part.added ? `<span style="background:#cfc">${part.value}</span>` :
+    part.removed ? `<span style="background:#fcc">${part.value}</span>` :
+    part.value
+  ).join('');
+  
+  document.getElementById('result').innerHTML = display;
+  
+  // 自动保存到本地
+  localStorage.setItem('lastDiary', text);
+}
+</script>
+</body>
+</html>
